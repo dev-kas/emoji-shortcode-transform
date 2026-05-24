@@ -19,7 +19,7 @@
     "transform"
   ],
   "author": "@dev-kas (https://github.com/dev-kas)",
-  "license": "MIT",
+  "license": "ISC",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/dev-kas/emoji-shortcode-transform.git"

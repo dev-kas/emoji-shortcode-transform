@@ -87,3 +87,11 @@ Returns `{ transform, suggest }` functions backed by `emojiMap`.
 ```sh
 npm test
 ```
+
+## License
+
+ISC. In practical terms, the ISC license is a permissive open source license:
+you can use, copy, modify, and distribute the software, including in proprietary
+projects, as long as the copyright notice and license text are included. It also
+disclaims warranties and liability from the author. See [LICENSE](./LICENSE) for
+the full legal text.
