@@ -5,7 +5,7 @@ Transform emoji shortcodes like `:thumbs_up:` into emoji characters.
 ## Install
 
 ```sh
-npm install emoji-shortcode-transform
+npm install @dev-kas/emoji-shortcode-transform
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ npm install emoji-shortcode-transform
 ### CommonJS
 
 ```js
-const { transform, suggest } = require("emoji-shortcode-transform");
+const { transform, suggest } = require("@dev-kas/emoji-shortcode-transform");
 
 transform("ship it :thumbs_up:");
 // "ship it 👍"
@@ -25,7 +25,7 @@ suggest("ship it :thu", 12);
 ### ESM
 
 ```js
-import { transform, suggest } from "emoji-shortcode-transform";
+import { transform, suggest } from "@dev-kas/emoji-shortcode-transform";
 
 transform("that is :fire:");
 // "that is 🔥"
@@ -40,7 +40,7 @@ Use `createEmojiTransform` when you want to provide your own shortcode map
 instead of the built-in one.
 
 ```js
-import { createEmojiTransform } from "emoji-shortcode-transform";
+import { createEmojiTransform } from "@dev-kas/emoji-shortcode-transform";
 
 const emoji = createEmojiTransform({
   party: "🎉",
