@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      body, html {
+        background: #131518;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        font-family: sans-serif;
+        gap: 30px;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+      border: 0;
+        box-sizing: border-box;
+      }
+      input, span {
+        font-size: 32px;
+        background: #5555557f;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <input oninput="dowork(this)" />
+    <span id="suggestions">[]</span>
+    <script src="./index.js"></script>
+    <script>
+      function dowork(input) {
+        const suggestions = document.getElementById("suggestions");
+        
+        const curr = input.selectionStart;
+        const oldval = input.value;
+        
+        // transform
+        const newval = window.transform(oldval);
+        input.value = newval;
+
+        // display suggestions
+        const activeSuggestions = window.suggest(oldval, curr);
+        suggestions.innerText = '[' + activeSuggestions.join(', ') + ']';
+
+        // calculate and restore cursor position
+        const lengthDiff = oldval.length - newval.length;
+        const newcurr = curr - lengthDiff;
+        input.setSelectionRange(newcurr, newcurr);
+      }
+    </script>
+  </body>
+</html>
