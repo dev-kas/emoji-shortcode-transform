@@ -1,0 +1,27 @@
+{
+  "name": "emoji-shortcode-transform",
+  "version": "0.1.0",
+  "description": "Transform emoji shortcodes into emoji characters.",
+  "main": "./index.js",
+  "module": "./index.mjs",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.js"
+    }
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [
+    "emoji",
+    "shortcode",
+    "transform"
+  ],
+  "author": "@dev-kas (https://github.com/dev-kas)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/dev-kas/emoji-shortcode-transform.git"
+  }
+}

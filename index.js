@@ -50,139 +50,142 @@ function levydp(a, b) {
 
 const validEmojiChars =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789";
-function transform(string) {
-  let i = 0;
-  let state = "DEFAULT";
-  let buffer = "";
-  let result = "";
-  let escaped = false;
 
-  while (i < string.length) {
-    let c = string[i];
-    switch (state) {
-      case "DEFAULT":
-        if (!escaped && c === ":") {
-          state = "EMOJI";
-          buffer = ":";
-        } else {
-          result += c;
-        }
-        break;
+function createEmojiTransform(emoji = emojiSubstitutionList) {
+  const emojiNames = Object.keys(emoji);
 
-      case "EMOJI":
-        if (!escaped && c === ":") {
-          state = "DEFAULT";
-          result += emojiSubstitutionList[buffer.slice(1)] || buffer + ":";
-          buffer = "";
-        } else if (!escaped && !validEmojiChars.includes(c)) {
-          result += buffer;
-          buffer = "";
-          state = "DEFAULT";
-          i--;
-        } else {
-          buffer += c;
-        }
-        break;
-    }
-    i++;
-    escaped = !escaped && c === "\\";
-  }
+  function transform(string) {
+    let i = 0;
+    let state = "DEFAULT";
+    let buffer = "";
+    let result = "";
+    let escaped = false;
 
-  if (state === "EMOJI") {
-    result += `${buffer}`;
-  }
+    while (i < string.length) {
+      let c = string[i];
+      switch (state) {
+        case "DEFAULT":
+          if (!escaped && c === ":") {
+            state = "EMOJI";
+            buffer = ":";
+          } else {
+            result += c;
+          }
+          break;
 
-  return result;
-}
-
-const emojiNames = Object.keys(emojiSubstitutionList);
-function suggest(string, cursor) {
-  const workspace = string.slice(0, cursor);
-  let i = 0;
-  let state = "DEFAULT";
-  let buffer = "";
-  let escaped = false;
-
-  while (i < workspace.length) {
-    let c = workspace[i];
-
-    switch (state) {
-      case "DEFAULT":
-        if (!escaped && c === ":") {
-          state = "EMOJI";
-          buffer = ":";
-        }
-        break;
-
-      case "EMOJI":
-        if (!escaped && c === ":") {
-          state = "DEFAULT";
-          buffer = "";
-        } else if (!escaped && !validEmojiChars.includes(c)) {
-          state = "DEFAULT";
-          buffer = "";
-        } else {
-          buffer += c;
-        }
-        break;
+        case "EMOJI":
+          if (!escaped && c === ":") {
+            state = "DEFAULT";
+            result += emoji[buffer.slice(1)] || buffer + ":";
+            buffer = "";
+          } else if (!escaped && !validEmojiChars.includes(c)) {
+            result += buffer;
+            buffer = "";
+            state = "DEFAULT";
+            i--;
+          } else {
+            buffer += c;
+          }
+          break;
+      }
+      i++;
+      escaped = !escaped && c === "\\";
     }
 
-    i++;
-    escaped = !escaped && c === "\\";
+    if (state === "EMOJI") {
+      result += `${buffer}`;
+    }
+
+    return result;
   }
 
-  if (state === "EMOJI") {
-    const query = buffer.slice(1);
-    const cands = emojiNames.map((name) => {
-      return {
-        name,
-        distance: levydp(query, name),
-        isPrefix: name.startsWith(query),
-      };
-    });
+  function suggest(string, cursor) {
+    const workspace = string.slice(0, cursor);
+    let i = 0;
+    let state = "DEFAULT";
+    let buffer = "";
+    let escaped = false;
 
-    cands.sort((a, b) => {
-      if (a.isPrefix && !b.isPrefix) return -1;
-      if (!a.isPrefix && b.isPrefix) return 1;
+    while (i < workspace.length) {
+      let c = workspace[i];
 
-      if (a.distance !== b.distance) {
-        return a.distance - b.distance;
+      switch (state) {
+        case "DEFAULT":
+          if (!escaped && c === ":") {
+            state = "EMOJI";
+            buffer = ":";
+          }
+          break;
+
+        case "EMOJI":
+          if (!escaped && c === ":") {
+            state = "DEFAULT";
+            buffer = "";
+          } else if (!escaped && !validEmojiChars.includes(c)) {
+            state = "DEFAULT";
+            buffer = "";
+          } else {
+            buffer += c;
+          }
+          break;
       }
 
-      return a.name.localeCompare(b.name);
-    });
+      i++;
+      escaped = !escaped && c === "\\";
+    }
 
-    return cands
-      .filter((c) => c.isPrefix || c.distance <= 2)
-      .map((c) => c.name);
+    if (state === "EMOJI") {
+      const query = buffer.slice(1);
+      const cands = emojiNames.map((name) => {
+        return {
+          name,
+          distance: levydp(query, name),
+          isPrefix: name.startsWith(query),
+        };
+      });
+
+      cands.sort((a, b) => {
+        if (a.isPrefix && !b.isPrefix) return -1;
+        if (!a.isPrefix && b.isPrefix) return 1;
+
+        if (a.distance !== b.distance) {
+          return a.distance - b.distance;
+        }
+
+        return a.name.localeCompare(b.name);
+      });
+
+      return cands
+        .filter((c) => c.isPrefix || c.distance <= 2)
+        .map((c) => c.name);
+    }
+
+    return [];
   }
 
-  return [];
+  return { transform, suggest };
 }
 
-// for testing the logic
-function applySubstringTransform(string) {
-  string = string.split("");
-  let substr = "";
-  for (let i = 0; i < string.length; i++) {
-    substr += string[i];
-    const transformed = transform(substr);
-    const suggestions = suggest(substr, i + 1);
-    console.log(
-      `${i + 1}. "${substr}" - "${transformed}" - [${suggestions.join(", ")}]`,
-    );
-  }
-}
+const defaultTransform = createEmojiTransform();
+const transform = defaultTransform.transform;
+const suggest = defaultTransform.suggest;
 
-applySubstringTransform("Hello world!");
-applySubstringTransform("He :sob2: d! :wasd: :sob: :skull:");
-applySubstringTransform("yo \\:sob2: :sob: a");
-applySubstringTransform("wasd \\\\:sob:");
-applySubstringTransform(":sib:");
-applySubstringTransform(":sob:");
+const api = {
+  createEmojiTransform,
+  default: defaultTransform,
+  emojiSubstitutionList,
+  suggest,
+  transform,
+};
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = api;
+}
 
 // if in browser then export
 try {
   window.suggest = suggest;
   window.transform = transform;
+  window.createEmojiTransform = createEmojiTransform;
+  window.emojiSubstitutionList = emojiSubstitutionList;
 } catch (_) {}
